@@ -29,6 +29,26 @@ class OrderSeeder extends Seeder
         }
 
         $statuses = Order::ORDER_STATUSES;
+        $locations = [
+            ['city' => 'Kathmandu', 'state' => 'Bagmati', 'postal_code' => '44600'],
+            ['city' => 'Pokhara', 'state' => 'Gandaki', 'postal_code' => '33700'],
+            ['city' => 'Lalitpur', 'state' => 'Bagmati', 'postal_code' => '44700'],
+            ['city' => 'Bharatpur', 'state' => 'Bagmati', 'postal_code' => '44200'],
+            ['city' => 'Biratnagar', 'state' => 'Koshi', 'postal_code' => '56613'],
+        ];
+        $orderNotes = [
+            'Please call before delivery.',
+            'Please deliver during the daytime.',
+            'Leave the package at the front desk.',
+            'Please handle this package with care.',
+        ];
+        $reviewComments = [
+            'Great product and fast delivery. Very happy with this purchase.',
+            'The quality is excellent and it arrived in perfect condition.',
+            'Good value for money. I would recommend this to others.',
+            'Exactly as described and works really well.',
+            'Very satisfied with the product and the overall experience.',
+        ];
 
         foreach ($customers as $customer) {
             // 2-4 orders per customer
@@ -58,6 +78,7 @@ class OrderSeeder extends Seeder
                 }
 
                 $createdAt = Carbon::now()->subDays(random_int(1, 60))->subHours(random_int(0, 23));
+                $location = $locations[array_rand($locations)];
 
                 $paymentStatus = $status === Order::ORDER_DELIVERED || $status === Order::ORDER_SHIPPED
                     ? (in_array($status, [Order::ORDER_DELIVERED], true) ? Order::PAYMENT_PAID : Order::PAYMENT_PAID)
@@ -68,11 +89,11 @@ class OrderSeeder extends Seeder
                     'order_number' => 'ORD-'.date('Ymd').'-'.strtoupper(Str::random(8)),
                     'total_amount' => round($total, 2),
                     'shipping_address' => $customer->address,
-                    'city' => fake()->city(),
-                    'state' => fake()->state(),
-                    'postal_code' => fake()->numerify('#####'),
+                    'city' => $location['city'],
+                    'state' => $location['state'],
+                    'postal_code' => $location['postal_code'],
                     'country' => 'Nepal',
-                    'notes' => random_int(0, 3) === 0 ? fake()->sentence(8) : null,
+                    'notes' => random_int(0, 3) === 0 ? $orderNotes[array_rand($orderNotes)] : null,
                     'phone' => $customer->phone,
                     'customer_name' => $customer->name,
                     'customer_email' => $customer->email,
@@ -106,7 +127,7 @@ class OrderSeeder extends Seeder
                                 'product_id' => $orderItem->product_id,
                                 'order_id' => $order->id,
                                 'rating' => random_int(3, 5),
-                                'comment' => fake()->realText(100),
+                                'comment' => $reviewComments[array_rand($reviewComments)],
                                 'status' => Review::STATUS_APPROVED,
                                 'created_at' => $createdAt->addDays(4),
                             ]);
